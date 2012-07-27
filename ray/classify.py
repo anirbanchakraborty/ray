@@ -489,7 +489,8 @@ class ConvexHullFeatureManager(NullFeatureManager):
 class HistogramFeatureManager(NullFeatureManager):
     def __init__(self, nbins=4, minval=0.0, maxval=1.0, 
             compute_percentiles=[], oriented=False, 
-            compute_histogram=True, histogram_feature = True, *args, **kwargs):
+            compute_histogram=True, histogram_feature = True,
+            channels = [0], *args, **kwargs):
         super(HistogramFeatureManager, self).__init__()
         self.minval = minval
         self.maxval = maxval
@@ -497,6 +498,7 @@ class HistogramFeatureManager(NullFeatureManager):
         self.oriented = oriented
         self.compute_histogram = compute_histogram
         self.histogram_feature = histogram_feature
+        self.channels = channels
         try:
             _ = len(compute_percentiles)
         except TypeError: # single percentile value given

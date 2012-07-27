@@ -548,18 +548,18 @@ class HistogramFeatureManager(NullFeatureManager):
     def create_node_cache(self, g, n):
         node_idxs = list(g.node[n]['extent'])
         if self.oriented:
-            ar = g.max_probabilities_r[..., channels]
+            ar = g.max_probabilities_r[..., self.channels]
         else:
-            ar = g.non_oriented_probabilities_r[..., channels]
+            ar = g.non_oriented_probabilities_r[..., self.channels]
 
         return self.histogram(ar[node_idxs,:])
 
     def create_edge_cache(self, g, n1, n2):
         edge_idxs = list(g[n1][n2]['boundary'])
         if self.oriented:
-            ar = g.oriented_probabilities_r[..., channels]
+            ar = g.oriented_probabilities_r[..., self.channels]
         else:
-            ar = g.non_oriented_probabilities_r[..., channels]
+            ar = g.non_oriented_probabilities_r[..., self.channels]
 
         return self.histogram(ar[edge_idxs,:])
 
@@ -573,9 +573,9 @@ class HistogramFeatureManager(NullFeatureManager):
         if len(idxs) == 0: return
         a = -1.0 if remove else 1.0
         if self.oriented:
-            ar = g.max_probabilities_r[..., channels]
+            ar = g.max_probabilities_r[..., self.channels]
         else:
-            ar = g.non_oriented_probabilities_r[..., channels]
+            ar = g.non_oriented_probabilities_r[..., self.channels]
 
         dst += a * self.histogram(ar[idxs,:])
 
@@ -583,9 +583,9 @@ class HistogramFeatureManager(NullFeatureManager):
         if len(idxs) == 0: return
         a = -1.0 if remove else 1.0
         if self.oriented:
-            ar = g.oriented_probabilities_r[..., channels]
+            ar = g.oriented_probabilities_r[..., self.channels]
         else:
-            ar = g.non_oriented_probabilities_r[..., channels]
+            ar = g.non_oriented_probabilities_r[..., self.channels]
 
         dst += a * self.histogram(ar[idxs,:])
 

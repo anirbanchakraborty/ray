@@ -489,13 +489,14 @@ class ConvexHullFeatureManager(NullFeatureManager):
 class HistogramFeatureManager(NullFeatureManager):
     def __init__(self, nbins=4, minval=0.0, maxval=1.0, 
             compute_percentiles=[], oriented=False, 
-            compute_histogram=True, *args, **kwargs):
+            compute_histogram=True, histogram_feature = True, *args, **kwargs):
         super(HistogramFeatureManager, self).__init__()
         self.minval = minval
         self.maxval = maxval
         self.nbins = nbins
         self.oriented = oriented
         self.compute_histogram = compute_histogram
+        self.histogram_feature = histogram_feature
         try:
             _ = len(compute_percentiles)
         except TypeError: # single percentile value given
@@ -545,18 +546,18 @@ class HistogramFeatureManager(NullFeatureManager):
     def create_node_cache(self, g, n):
         node_idxs = list(g.node[n]['extent'])
         if self.oriented:
-            ar = g.max_probabilities_r
+            ar = g.max_probabilities_r[..., channels]
         else:
-            ar = g.non_oriented_probabilities_r
+            ar = g.non_oriented_probabilities_r[..., channels]
 
         return self.histogram(ar[node_idxs,:])
 
     def create_edge_cache(self, g, n1, n2):
         edge_idxs = list(g[n1][n2]['boundary'])
         if self.oriented:
-            ar = g.oriented_probabilities_r
+            ar = g.oriented_probabilities_r[..., channels]
         else:
-            ar = g.non_oriented_probabilities_r
+            ar = g.non_oriented_probabilities_r[..., channels]
 
         return self.histogram(ar[edge_idxs,:])
 
@@ -570,9 +571,9 @@ class HistogramFeatureManager(NullFeatureManager):
         if len(idxs) == 0: return
         a = -1.0 if remove else 1.0
         if self.oriented:
-            ar = g.max_probabilities_r
+            ar = g.max_probabilities_r[..., channels]
         else:
-            ar = g.non_oriented_probabilities_r
+            ar = g.non_oriented_probabilities_r[..., channels]
 
         dst += a * self.histogram(ar[idxs,:])
 
@@ -580,9 +581,9 @@ class HistogramFeatureManager(NullFeatureManager):
         if len(idxs) == 0: return
         a = -1.0 if remove else 1.0
         if self.oriented:
-            ar = g.oriented_probabilities_r
+            ar = g.oriented_probabilities_r[..., channels]
         else:
-            ar = g.non_oriented_probabilities_r
+            ar = g.non_oriented_probabilities_r[..., channels]
 
         dst += a * self.histogram(ar[idxs,:])
 
@@ -611,7 +612,10 @@ class HistogramFeatureManager(NullFeatureManager):
             cache = g.node[n1][self.default_cache]
         h, ps = self.normalized_histogram_from_cache(cache, 
                                                      self.compute_percentiles)
-        return concatenate((h,ps), axis=1).ravel()
+         if  self.histogram_feature:                                          
+            return concatenate((h,ps), axis=1).ravel()
+         else:   
+            return ps.ravel()
 
     def compute_edge_features(self, g, n1, n2, cache=None):
         if not self.compute_histogram:
@@ -620,7 +624,10 @@ class HistogramFeatureManager(NullFeatureManager):
             cache = g[n1][n2][self.default_cache]
         h, ps = self.normalized_histogram_from_cache(cache, 
                                                     self.compute_percentiles)
-        return concatenate((h,ps), axis=1).ravel()
+        if  self.histogram_feature:                                          
+            return concatenate((h,ps), axis=1).ravel()
+         else:   
+            return ps.ravel()
 
     def compute_difference_features(self,g, n1, n2, cache1=None, cache2=None):
         if cache1 is None:
